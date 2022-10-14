@@ -1,0 +1,26 @@
+Loja:
+  1: #ID do item, ele tem que ser unico
+    Name: '&eLançador' #Nome do item no menu
+    Slot: 12 #Slot do item no menu
+    Price: 5 #Preço do item
+    Material: '401:0' #Material:Data do item que vai aparecer no menu
+    Command: 'especial launcher {player} 1' #Comando que vai ser executado ao comprar
+    Lore: #Lore do item no menu
+      - '&7Use esse item para voar hehehe'
+      - ''
+      - ' §fPreço: §a{price}'
+      - ''
+      - '&aClique para comprar.'
+
+  2:
+    Name: '&6Raio Mestre'
+    Slot: 13
+    Price: 15
+    Material: '369:0'
+    Command: 'especial masterlightning {player} 1'
+    Lore:
+      - '&7Use pra spawnar um raio'
+      - ''
+      - ' &fPreço: &a{price}'
+      - ''
+      - '&aClique para comprar.'

@@ -1,0 +1,26 @@
+database:
+  type: "sqlite" #sqlite, mysql
+  mysql:
+    address: "135.148.84.216:3306"
+    username: "u13_XwvhaD2F1V"
+    password: "DqQSNsn+^=UNGz8CDrBVgMax"
+    database: "s13_factions"
+  sqlite:
+    file: "mobcoins.sql"
+
+Settings:
+  AdminPermission: 'mobcoins.admin'
+
+KillMob:
+  PIG: 5.0
+  WOLF: 5.0
+  COW: 5.0
+  SPIDER: 5.0
+  CAVE_SPIDER: 5.0
+  ZOMBIE: 5.0
+  SKELETON: 5.0
+  BLAZE: 5.0
+  PIG_ZOMBIE: 5.0
+  IRON_GOLEM: 5.0
+  WITCH: 5.0
+  WITHER: 5.0
