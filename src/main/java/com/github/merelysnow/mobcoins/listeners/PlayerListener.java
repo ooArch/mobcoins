@@ -7,6 +7,7 @@ import com.github.merelysnow.mobcoins.model.User;
 import com.github.merelysnow.mobcoins.utils.ActionBar;
 import lombok.val;
 import me.lucko.helper.Schedulers;
+import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -38,71 +39,86 @@ public class PlayerListener implements Listener {
         val config = MobCoinsPlugin.plugin.getConfig();
         User user = MobCoinsRepositories.CACHE_LOCAL.fetch(p.getName());
 
-        if(new Random().nextInt(100) >= 50) {
-            double mobcoins = 0D;
-            switch (e.getEntityType()) {
-                case PIG:
-                    mobcoins = config.getDouble("KillMob.PIG");
-                    user.setMobcoins(user.getMobcoins() + mobcoins);
-                    break;
+        if(e.getEntityType() != EntityType.PLAYER) {
 
-                case WOLF:
-                    mobcoins = config.getDouble("KillMob.WOLF");
-                    user.setMobcoins(user.getMobcoins() + mobcoins);
-                    break;
+            if (new Random().nextInt(100) >= 50) {
+                double mobcoins = 0D;
+                switch (e.getEntityType()) {
+                    case PIG:
+                        mobcoins = config.getDouble("KillMob.PIG");
+                        user.setMobcoins(user.getMobcoins() + mobcoins);
+                        break;
 
-                case COW:
-                    mobcoins = config.getDouble("KillMob.COW");
-                    user.setMobcoins(user.getMobcoins() + mobcoins);
-                    break;
+                    case WOLF:
+                        mobcoins = config.getDouble("KillMob.WOLF");
+                        user.setMobcoins(user.getMobcoins() + mobcoins);
+                        break;
 
-                case SPIDER:
-                    mobcoins = config.getDouble("KillMob.SPIDER");
-                    user.setMobcoins(user.getMobcoins() + mobcoins);
-                    break;
+                    case COW:
+                        mobcoins = config.getDouble("KillMob.COW");
+                        user.setMobcoins(user.getMobcoins() + mobcoins);
+                        break;
 
-                case CAVE_SPIDER:
-                    mobcoins = config.getDouble("KillMob.CAVE_SPIDER");
-                    user.setMobcoins(user.getMobcoins() + mobcoins);
-                    break;
+                    case SHEEP:
+                        mobcoins = config.getDouble("KillMob.SHEEP");
+                        user.setMobcoins(user.getMobcoins() + mobcoins);
+                        break;
 
-                case ZOMBIE:
-                    mobcoins = config.getDouble("KillMob.ZOMBIE");
-                    user.setMobcoins(user.getMobcoins() + mobcoins);
-                    break;
+                    case SPIDER:
+                        mobcoins = config.getDouble("KillMob.SPIDER");
+                        user.setMobcoins(user.getMobcoins() + mobcoins);
+                        break;
 
-                case SKELETON:
-                    mobcoins = config.getDouble("KillMob.SKELETON");
-                    user.setMobcoins(user.getMobcoins() + mobcoins);
-                    break;
+                    case CAVE_SPIDER:
+                        mobcoins = config.getDouble("KillMob.CAVE_SPIDER");
+                        user.setMobcoins(user.getMobcoins() + mobcoins);
+                        break;
 
-                case BLAZE:
-                    mobcoins = config.getDouble("KillMob.BLAZE");
-                    user.setMobcoins(user.getMobcoins() + mobcoins);
-                    break;
+                    case ZOMBIE:
+                        mobcoins = config.getDouble("KillMob.ZOMBIE");
+                        user.setMobcoins(user.getMobcoins() + mobcoins);
+                        break;
 
-                case PIG_ZOMBIE:
-                    mobcoins = config.getDouble("KillMob.PIG_ZOMBIE");
-                    user.setMobcoins(user.getMobcoins() + mobcoins);
-                    break;
+                    case SKELETON:
+                        mobcoins = config.getDouble("KillMob.SKELETON");
+                        user.setMobcoins(user.getMobcoins() + mobcoins);
+                        break;
 
-                case IRON_GOLEM:
-                    mobcoins = config.getDouble("KillMob.IRON_GOLEM");
-                    user.setMobcoins(user.getMobcoins() + mobcoins);
-                    break;
+                    case BLAZE:
+                        mobcoins = config.getDouble("KillMob.BLAZE");
+                        user.setMobcoins(user.getMobcoins() + mobcoins);
+                        break;
 
-                case WITCH:
-                    mobcoins = config.getDouble("KillMob.WITCH");
-                    user.setMobcoins(user.getMobcoins() + mobcoins);
-                    break;
+                    case PIG_ZOMBIE:
+                        mobcoins = config.getDouble("KillMob.PIG_ZOMBIE");
+                        user.setMobcoins(user.getMobcoins() + mobcoins);
+                        break;
 
-                case WITHER:
-                    mobcoins = config.getDouble("KillMob.WITHER");
-                    user.setMobcoins(user.getMobcoins() + mobcoins);
-                    break;
+                    case IRON_GOLEM:
+                        mobcoins = config.getDouble("KillMob.IRON_GOLEM");
+                        user.setMobcoins(user.getMobcoins() + mobcoins);
+                        break;
+
+                    case VILLAGER:
+                        mobcoins = config.getDouble("KillMob.VILLAGER");
+                        user.setMobcoins(user.getMobcoins() + mobcoins);
+                        break;
+
+                    case WITCH:
+                        mobcoins = config.getDouble("KillMob.WITCH");
+                        user.setMobcoins(user.getMobcoins() + mobcoins);
+                        break;
+
+                    case WITHER:
+                        mobcoins = config.getDouble("KillMob.WITHER");
+                        user.setMobcoins(user.getMobcoins() + mobcoins);
+                        break;
+
+                    default:
+                        break;
+                }
+                Schedulers.async().runLater(() -> MobCoinsRepositories.MYSQL.insert(user), 5, TimeUnit.SECONDS);
             }
-            Schedulers.async().runLater(() -> MobCoinsRepositories.MYSQL.insert(user),  5, TimeUnit.SECONDS);
-            ActionBar.sendToPlayer(p, "§e+" + mobcoins + " MobCoins");
         }
     }
 }

@@ -23,88 +23,77 @@ public class MobCoinsCommand {
             aliases = "mb",
             target = CommandTarget.PLAYER
     )
-    public void MobCoinsCommand(Context<Player> context) {
+    public void handleCommand(Context<Player> context) {
 
         val p = context.getSender();
         User user = MobCoinsRepositories.CACHE_LOCAL.fetch(p.getName());
 
-        if(context.getArgs().length == 0) {
-            p.sendMessage("§eSuas mobcoins: §f" + user.getMobcoins());
+        p.sendMessage("§eSuas mobcoins: §f" + NumberFormat.getInstance().format(user.getMobcoins()));
+        return;
+    }
+
+    @Command(
+            name = "mobcoins.loja",
+            usage = "mobcoins loja",
+            target = CommandTarget.PLAYER
+    )
+    public void subCommandLoja(Context<Player> context) {
+
+        val p = context.getSender();
+        User user = MobCoinsRepositories.CACHE_LOCAL.fetch(p.getName());
+
+        MobCoinsPlugin.viewFrame.open(MobCoinsShopView.class, p, ImmutableMap.of("user", user));
+        return;
+    }
+
+    @Command(
+            name = "mobcoins.adicionar",
+            usage = "mobcoins adicionar <player> <quantia>",
+            target = CommandTarget.PLAYER,
+            permission = "mobcoins.admin"
+    )
+    public void subCommandAdicionar(Context<Player> context, Player target, Double amount) {
+
+        val p = context.getSender();
+        User targetCache = MobCoinsRepositories.CACHE_LOCAL.fetch(target.getName());
+
+        if (targetCache == null) {
+            p.sendMessage("§cO jogador alvo não foi encontado em nosso Cache.");
             return;
         }
 
-        if(context.getArg(0).equalsIgnoreCase("loja")) {
-            MobCoinsPlugin.viewFrame.open(MobCoinsShopView.class, p, ImmutableMap.of("user", user));
+        targetCache.setMobcoins(targetCache.getMobcoins() + amount);
+        Schedulers.async().runLater(() -> MobCoinsRepositories.MYSQL.insert(targetCache), 5, TimeUnit.SECONDS);
+        p.sendMessage("§eVocê adicionou §f" + NumberFormat.getInstance().format(amount) + " §eMobCoins para o jogador §f" + target.getName() + "§e.");
+        return;
+    }
+
+    @Command(
+            name = "mobcoins.remover",
+            usage = "mobcoins remover <player> <quantia>",
+            target = CommandTarget.PLAYER,
+            permission = "mobcoins.admin"
+    )
+    public void subCommandRemover(Context<Player> context, Player target, Double amount) {
+
+        val p = context.getSender();
+        User targetCache = MobCoinsRepositories.CACHE_LOCAL.fetch(target.getName());
+
+        if (targetCache == null) {
+            p.sendMessage("§cO jogador alvo não foi encontado em nosso Cache.");
             return;
         }
 
-        if(context.getArg(0).equalsIgnoreCase("adicionar")) {
-            if(p.hasPermission(MobCoinsPlugin.plugin.getConfig().getString("Settings.AdminPermission"))) {
-
-                Player target;
-                double amount;
-
-                try {
-                    target = Bukkit.getPlayerExact(context.getArg(1));
-                    amount = Double.parseDouble(context.getArg(2));
-                } catch (Throwable e) {
-                    p.sendMessage("§cUtilize, /mobcoins adicionar <jogador< quantia>.");
-                    return;
-                }
-
-                if (target == null) {
-                    p.sendMessage("§cO jogador alvo esta offline ou não existe.");
-                    return;
-                }
-
-                User targetCache = MobCoinsRepositories.CACHE_LOCAL.fetch(target.getName());
-
-                targetCache.setMobcoins(targetCache.getMobcoins() + amount);
-                Schedulers.async().runLater(() -> MobCoinsRepositories.MYSQL.insert(targetCache),  5, TimeUnit.SECONDS);
-                p.sendMessage("§eVocê adicionou §f" + NumberFormat.getInstance().format(amount) + " §eMobCoins para o jogador §f" + target.getName() + "§e.");
-                return;
-            }else{
-                p.sendMessage("§cSem permissão.");
-                return;
-            }
+        if (amount > targetCache.getMobcoins()) {
+            targetCache.setMobcoins(0);
+            Schedulers.async().runLater(() -> MobCoinsRepositories.MYSQL.insert(targetCache), 5, TimeUnit.SECONDS);
+            p.sendMessage("§eVocê removeu §f" + NumberFormat.getInstance().format(amount) + " §eMobCoins do jogador §f" + target.getName() + "§e.");
+            return;
         }
 
-        if(context.getArg(0).equalsIgnoreCase("remover")) {
-            if(p.hasPermission(MobCoinsPlugin.plugin.getConfig().getString("Settings.AdminPermission"))) {
-
-                Player target;
-                double amount;
-
-                try {
-                    target = Bukkit.getPlayerExact(context.getArg(1));
-                    amount = Double.parseDouble(context.getArg(2));
-                } catch (Throwable e) {
-                    p.sendMessage("§cUtilize, /mobcoins remover <jogador< quantia>.");
-                    return;
-                }
-
-                if (target == null) {
-                    p.sendMessage("§cO jogador alvo esta offline ou não existe.");
-                    return;
-                }
-
-                User targetCache = MobCoinsRepositories.CACHE_LOCAL.fetch(target.getName());
-
-                if(amount > targetCache.getMobcoins()) {
-                    targetCache.setMobcoins(0);
-                    Schedulers.async().runLater(() -> MobCoinsRepositories.MYSQL.insert(targetCache),  5, TimeUnit.SECONDS);
-                    p.sendMessage("§eVocê removeu §f" + NumberFormat.getInstance().format(amount) + " §eMobCoins do jogador §f" + target.getName() + "§e.");
-                    return;
-                }
-
-                targetCache.setMobcoins(targetCache.getMobcoins() - amount);
-                Schedulers.async().runLater(() -> MobCoinsRepositories.MYSQL.insert(targetCache),  5, TimeUnit.SECONDS);
-                p.sendMessage("§eVocê removeu §f" + NumberFormat.getInstance().format(amount) + " §eMobCoins do jogador §f" + target.getName() + "§e.");
-                return;
-            }else{
-                p.sendMessage("§cSem permissão.");
-                return;
-            }
-        }
+        targetCache.setMobcoins(targetCache.getMobcoins() - amount);
+        Schedulers.async().runLater(() -> MobCoinsRepositories.MYSQL.insert(targetCache), 5, TimeUnit.SECONDS);
+        p.sendMessage("§eVocê removeu §f" + NumberFormat.getInstance().format(amount) + " §eMobCoins do jogador §f" + target.getName() + "§e.");
+        return;
     }
 }
