@@ -113,7 +113,7 @@ public class MobCoinsCommand {
             case "holograma":
                 MobCoinsPlugin.plugin.getConfig().set("Locais.Holograma", StringUtils.serializeLocation(p.getLocation()));
                 MobCoinsPlugin.plugin.saveConfig();
-                ActionBar.sendToPlayer(p,"§eLocal 'holograma' setado com sucesso");
+                ActionBar.sendToPlayer(p,"§eLocal 'hologram' setado com sucesso");
                 break;
 
             default:
