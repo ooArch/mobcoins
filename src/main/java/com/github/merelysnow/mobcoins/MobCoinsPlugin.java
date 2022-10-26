@@ -4,6 +4,7 @@ import com.github.merelysnow.mobcoins.commands.MobCoinsCommand;
 import com.github.merelysnow.mobcoins.database.connection.RepositoryProvider;
 import com.github.merelysnow.mobcoins.listeners.PlayerListener;
 import com.github.merelysnow.mobcoins.model.store.StoreDAO;
+import com.github.merelysnow.mobcoins.thread.HologramThread;
 import com.github.merelysnow.mobcoins.utils.DateManager;
 import com.github.merelysnow.mobcoins.view.MobCoinsShopView;
 import com.henryfabio.sqlprovider.connector.SQLConnector;
@@ -38,6 +39,11 @@ public class MobCoinsPlugin extends JavaPlugin {
         registerCommands();
         registerEvents();
 
+        if(getConfig().contains("Locais.Holograma")) {
+            (new HologramThread()).runTaskTimer(this, 20L, 60 * 5 * 20L);
+            Bukkit.getConsoleSender().sendMessage("§6[MobCoins] §eHolograma registrado.");
+        }
+
         Bukkit.getConsoleSender().sendMessage("§6[MobCoins] §ePlugin iniciado");
     }
 
@@ -46,7 +52,6 @@ public class MobCoinsPlugin extends JavaPlugin {
     }
 
     private void registerCommands() {
-
         BukkitFrame bukkitFrame = new BukkitFrame(this);
 
         bukkitFrame.registerCommands(

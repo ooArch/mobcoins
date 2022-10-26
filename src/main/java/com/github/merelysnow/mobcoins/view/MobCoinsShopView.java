@@ -30,7 +30,7 @@ public class MobCoinsShopView extends View {
         User user = context.get("user");
 
         context.slot(4, new ItemBuilder(Material.SKULL_ITEM, 1, (short)3)
-                .setName(LuckPermsUtil.getGroupPrefix(context.getPlayer()) + context.getPlayer().getName())
+                .setName(LuckPermsUtil.getGroupPrefix(user.getName()) + context.getPlayer().getName())
                 .setLore("",
                         " §fMobcoins: §e" + NumberFormat.getInstance().format(user.getMobcoins()),
                         "")

@@ -3,6 +3,8 @@ package com.github.merelysnow.mobcoins.commands;
 import com.github.merelysnow.mobcoins.MobCoinsPlugin;
 import com.github.merelysnow.mobcoins.MobCoinsRepositories;
 import com.github.merelysnow.mobcoins.model.User;
+import com.github.merelysnow.mobcoins.utils.ActionBar;
+import com.github.merelysnow.mobcoins.utils.StringUtils;
 import com.github.merelysnow.mobcoins.view.MobCoinsShopView;
 import com.google.common.collect.ImmutableMap;
 import lombok.val;
@@ -95,5 +97,28 @@ public class MobCoinsCommand {
         Schedulers.async().runLater(() -> MobCoinsRepositories.MYSQL.insert(targetCache), 5, TimeUnit.SECONDS);
         p.sendMessage("§eVocê removeu §f" + NumberFormat.getInstance().format(amount) + " §eMobCoins do jogador §f" + target.getName() + "§e.");
         return;
+    }
+
+    @Command(
+            name = "mobcoins.setar",
+            usage = "mobcoins setar <tipo>",
+            permission = "mobcoins.admin",
+            target = CommandTarget.PLAYER
+    )
+    public void subCommandSetar(Context<Player> context, String type) {
+
+        val p = context.getSender();
+
+        switch (type) {
+            case "holograma":
+                MobCoinsPlugin.plugin.getConfig().set("Locais.Holograma", StringUtils.serializeLocation(p.getLocation()));
+                MobCoinsPlugin.plugin.saveConfig();
+                ActionBar.sendToPlayer(p,"§eLocal 'holograma' setado com sucesso");
+                break;
+
+            default:
+                ActionBar.sendToPlayer(p, "§cTipo invalido. (holograma)");
+                break;
+        }
     }
 }
