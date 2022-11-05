@@ -11,20 +11,10 @@ database:
 Settings:
   AdminPermission: 'mobcoins.admin'
 
-KillMob:
-  PIG: 5.0
-  WOLF: 5.0
-  COW: 5.0
-  SHEEP: 5.0
-  SPIDER: 10.0
-  CAVE_SPIDER: 10.0
-  ZOMBIE: 20.0
-  SKELETON: 20.0
-  BLAZE: 30.0
-  PIG_ZOMBIE: 10.0
-  IRON_GOLEM: 40.0
-  VILLAGER: 40.0
-  WITCH: 40.0
-  WITHER: 50.0
+Configuration:
+  Entity:
+    - 'COW,5.0'
+    - 'SHEEP,5.0'
+
 
 Locais: {}

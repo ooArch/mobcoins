@@ -44,7 +44,7 @@ public class MobCoinsCommand {
         val p = context.getSender();
         User user = MobCoinsRepositories.CACHE_LOCAL.fetch(p.getName());
 
-        MobCoinsPlugin.viewFrame.open(MobCoinsShopView.class, p, ImmutableMap.of("user", user));
+        MobCoinsPlugin.plugin.getViewFrame().open(MobCoinsShopView.class, p, ImmutableMap.of("user", user));
         return;
     }
 

@@ -7,6 +7,7 @@ import com.github.merelysnow.mobcoins.model.store.StoreDAO;
 import com.github.merelysnow.mobcoins.thread.HologramThread;
 import com.github.merelysnow.mobcoins.utils.DateManager;
 import com.github.merelysnow.mobcoins.view.MobCoinsShopView;
+import com.google.common.primitives.Doubles;
 import com.henryfabio.sqlprovider.connector.SQLConnector;
 import lombok.Getter;
 import me.saiintbrisson.bukkit.command.BukkitFrame;
@@ -14,15 +15,19 @@ import me.saiintbrisson.minecraft.ViewFrame;
 import me.saiintbrisson.minecraft.command.message.MessageHolder;
 import me.saiintbrisson.minecraft.command.message.MessageType;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.LinkedHashMap;
 
 public class MobCoinsPlugin extends JavaPlugin {
 
     public static MobCoinsPlugin plugin;
     public static SQLConnector CONNECTOR;
-
-    public static ViewFrame viewFrame;
+    @Getter private ViewFrame viewFrame;
     @Getter private StoreDAO storeDAO;
+    @Getter private LinkedHashMap<EntityType, Double> cache = new LinkedHashMap<>();
 
     @Override
     public void onEnable() {
@@ -38,9 +43,10 @@ public class MobCoinsPlugin extends JavaPlugin {
 
         registerCommands();
         registerEvents();
+        registerEntity();
 
         if(getConfig().contains("Locais.Holograma")) {
-            (new HologramThread()).runTaskTimer(this, 20L, 60 * 5 * 20L);
+            (new HologramThread()).runTaskTimer(this, 20L, 60 * 30 * 20L);
             Bukkit.getConsoleSender().sendMessage("§6[MobCoins] §eHolograma registrado.");
         }
 
@@ -64,5 +70,15 @@ public class MobCoinsPlugin extends JavaPlugin {
         messageHolder.setMessage(MessageType.ERROR, "§cUm erro ocorreu! {error}");
         messageHolder.setMessage(MessageType.INCORRECT_USAGE, "§cUtilize /{usage}");
         messageHolder.setMessage(MessageType.INCORRECT_TARGET, "§cVocê não pode utilizar este comando pois ele é direcioado apenas para {target}.");
+    }
+
+    private void registerEntity() {
+
+        ConfigurationSection path = plugin.getConfig().getConfigurationSection("Configuration");
+
+        for (String key : path.getStringList("Entity")) {
+            String[] string = key.split(",");
+            cache.put(EntityType.valueOf(string[0].toUpperCase()), Doubles.tryParse(string[1]));
+        }
     }
 }

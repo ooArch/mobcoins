@@ -44,84 +44,11 @@ public class PlayerListener implements Listener {
             User user = MobCoinsRepositories.CACHE_LOCAL.fetch(p.getName());
 
             if (user != null) {
-
                 if (new Random().nextInt(100) >= 50) {
-                    double mobcoins = 0D;
-                    switch (e.getEntityType()) {
-                        case PIG:
-                            mobcoins = config.getDouble("KillMob.PIG");
-                            user.setMobcoins(user.getMobcoins() + mobcoins);
-                            break;
-
-                        case WOLF:
-                            mobcoins = config.getDouble("KillMob.WOLF");
-                            user.setMobcoins(user.getMobcoins() + mobcoins);
-                            break;
-
-                        case COW:
-                            mobcoins = config.getDouble("KillMob.COW");
-                            user.setMobcoins(user.getMobcoins() + mobcoins);
-                            break;
-
-                        case SHEEP:
-                            mobcoins = config.getDouble("KillMob.SHEEP");
-                            user.setMobcoins(user.getMobcoins() + mobcoins);
-                            break;
-
-                        case SPIDER:
-                            mobcoins = config.getDouble("KillMob.SPIDER");
-                            user.setMobcoins(user.getMobcoins() + mobcoins);
-                            break;
-
-                        case CAVE_SPIDER:
-                            mobcoins = config.getDouble("KillMob.CAVE_SPIDER");
-                            user.setMobcoins(user.getMobcoins() + mobcoins);
-                            break;
-
-                        case ZOMBIE:
-                            mobcoins = config.getDouble("KillMob.ZOMBIE");
-                            user.setMobcoins(user.getMobcoins() + mobcoins);
-                            break;
-
-                        case SKELETON:
-                            mobcoins = config.getDouble("KillMob.SKELETON");
-                            user.setMobcoins(user.getMobcoins() + mobcoins);
-                            break;
-
-                        case BLAZE:
-                            mobcoins = config.getDouble("KillMob.BLAZE");
-                            user.setMobcoins(user.getMobcoins() + mobcoins);
-                            break;
-
-                        case PIG_ZOMBIE:
-                            mobcoins = config.getDouble("KillMob.PIG_ZOMBIE");
-                            user.setMobcoins(user.getMobcoins() + mobcoins);
-                            break;
-
-                        case IRON_GOLEM:
-                            mobcoins = config.getDouble("KillMob.IRON_GOLEM");
-                            user.setMobcoins(user.getMobcoins() + mobcoins);
-                            break;
-
-                        case VILLAGER:
-                            mobcoins = config.getDouble("KillMob.VILLAGER");
-                            user.setMobcoins(user.getMobcoins() + mobcoins);
-                            break;
-
-                        case WITCH:
-                            mobcoins = config.getDouble("KillMob.WITCH");
-                            user.setMobcoins(user.getMobcoins() + mobcoins);
-                            break;
-
-                        case WITHER:
-                            mobcoins = config.getDouble("KillMob.WITHER");
-                            user.setMobcoins(user.getMobcoins() + mobcoins);
-                            break;
-
-                        default:
-                            break;
+                    if(MobCoinsPlugin.plugin.getCache().containsKey(e.getEntityType())) {
+                        user.setMobcoins(user.getMobcoins() + MobCoinsPlugin.plugin.getCache().getOrDefault(e.getEntityType(), 1.0));
+                        Schedulers.async().runLater(() -> MobCoinsRepositories.MYSQL.insert(user), 5, TimeUnit.SECONDS);
                     }
-                    Schedulers.async().runLater(() -> MobCoinsRepositories.MYSQL.insert(user), 5, TimeUnit.SECONDS);
                 }
             }
         }
