@@ -1,7 +1,6 @@
 package com.github.merelysnow.mobcoins.commands;
 
 import com.github.merelysnow.mobcoins.MobCoinsPlugin;
-import com.github.merelysnow.mobcoins.MobCoinsRepositories;
 import com.github.merelysnow.mobcoins.model.User;
 import com.github.merelysnow.mobcoins.utils.ActionBar;
 import com.github.merelysnow.mobcoins.utils.StringUtils;
@@ -12,7 +11,6 @@ import me.lucko.helper.Schedulers;
 import me.saiintbrisson.minecraft.command.annotation.Command;
 import me.saiintbrisson.minecraft.command.command.Context;
 import me.saiintbrisson.minecraft.command.target.CommandTarget;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.text.NumberFormat;
@@ -27,8 +25,8 @@ public class MobCoinsCommand {
     )
     public void handleCommand(Context<Player> context) {
 
-        val p = context.getSender();
-        User user = MobCoinsRepositories.CACHE_LOCAL.fetch(p.getName());
+        Player p = context.getSender();
+        User user = MobCoinsPlugin.getInstance().getUserController().get(p.getName());
 
         p.sendMessage("§eSuas mobcoins: §f" + NumberFormat.getInstance().format(user.getMobcoins()));
         return;
@@ -41,10 +39,10 @@ public class MobCoinsCommand {
     )
     public void subCommandLoja(Context<Player> context) {
 
-        val p = context.getSender();
-        User user = MobCoinsRepositories.CACHE_LOCAL.fetch(p.getName());
+        Player p = context.getSender();
+        User user = MobCoinsPlugin.getInstance().getUserController().get(p.getName());
 
-        MobCoinsPlugin.plugin.getViewFrame().open(MobCoinsShopView.class, p, ImmutableMap.of("user", user));
+        MobCoinsPlugin.getInstance().getViewFrame().open(MobCoinsShopView.class, p, ImmutableMap.of("user", user));
         return;
     }
 
@@ -57,7 +55,7 @@ public class MobCoinsCommand {
     public void subCommandAdicionar(Context<Player> context, Player target, Double amount) {
 
         val p = context.getSender();
-        User targetCache = MobCoinsRepositories.CACHE_LOCAL.fetch(target.getName());
+        User targetCache = MobCoinsPlugin.getInstance().getUserController().get(target.getName());
 
         if (targetCache == null) {
             p.sendMessage("§cO jogador alvo não foi encontado em nosso Cache.");
@@ -65,7 +63,7 @@ public class MobCoinsCommand {
         }
 
         targetCache.setMobcoins(targetCache.getMobcoins() + amount);
-        Schedulers.async().runLater(() -> MobCoinsRepositories.MYSQL.insert(targetCache), 5, TimeUnit.SECONDS);
+        MobCoinsPlugin.getInstance().getMobCoinsDatabase().insert(targetCache);
         p.sendMessage("§eVocê adicionou §f" + NumberFormat.getInstance().format(amount) + " §eMobCoins para o jogador §f" + target.getName() + "§e.");
         return;
     }
@@ -79,7 +77,7 @@ public class MobCoinsCommand {
     public void subCommandRemover(Context<Player> context, Player target, Double amount) {
 
         val p = context.getSender();
-        User targetCache = MobCoinsRepositories.CACHE_LOCAL.fetch(target.getName());
+        User targetCache = MobCoinsPlugin.getInstance().getUserController().get(target.getName());
 
         if (targetCache == null) {
             p.sendMessage("§cO jogador alvo não foi encontado em nosso Cache.");
@@ -88,13 +86,13 @@ public class MobCoinsCommand {
 
         if (amount > targetCache.getMobcoins()) {
             targetCache.setMobcoins(0);
-            Schedulers.async().runLater(() -> MobCoinsRepositories.MYSQL.insert(targetCache), 5, TimeUnit.SECONDS);
+            MobCoinsPlugin.getInstance().getMobCoinsDatabase().insert(targetCache);
             p.sendMessage("§eVocê removeu §f" + NumberFormat.getInstance().format(amount) + " §eMobCoins do jogador §f" + target.getName() + "§e.");
             return;
         }
 
         targetCache.setMobcoins(targetCache.getMobcoins() - amount);
-        Schedulers.async().runLater(() -> MobCoinsRepositories.MYSQL.insert(targetCache), 5, TimeUnit.SECONDS);
+        MobCoinsPlugin.getInstance().getMobCoinsDatabase().insert(targetCache);
         p.sendMessage("§eVocê removeu §f" + NumberFormat.getInstance().format(amount) + " §eMobCoins do jogador §f" + target.getName() + "§e.");
         return;
     }
@@ -111,8 +109,8 @@ public class MobCoinsCommand {
 
         switch (type) {
             case "holograma":
-                MobCoinsPlugin.plugin.getConfig().set("Locais.Holograma", StringUtils.serializeLocation(p.getLocation()));
-                MobCoinsPlugin.plugin.saveConfig();
+                MobCoinsPlugin.getInstance().getConfig().set("Locais.Holograma", StringUtils.serializeLocation(p.getLocation()));
+                MobCoinsPlugin.getInstance().saveConfig();
                 ActionBar.sendToPlayer(p,"§eLocal 'hologram' setado com sucesso");
                 break;
 

@@ -226,6 +226,6 @@ public class StringUtils {
     // ------------------------------
 
     private static final File folder = new File("plugins");
-    private static final PluginLoader loader = MobCoinsPlugin.plugin.getPluginLoader();
+    private static final PluginLoader loader = MobCoinsPlugin.getInstance().getPluginLoader();
     private static final Pattern pattern = Pattern.compile("[^A-zÀ-ü0-9@$]");
 }

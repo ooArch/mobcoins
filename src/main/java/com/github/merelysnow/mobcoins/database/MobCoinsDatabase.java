@@ -1,59 +1,77 @@
 package com.github.merelysnow.mobcoins.database;
 
 import com.github.merelysnow.mobcoins.MobCoinsPlugin;
+import com.github.merelysnow.mobcoins.database.connection.RepositoryProvider;
 import com.github.merelysnow.mobcoins.model.User;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.GsonBuilder;
+import com.henryfabio.sqlprovider.connector.SQLConnector;
 import com.henryfabio.sqlprovider.executor.SQLExecutor;
 import com.henryfabio.sqlprovider.executor.adapter.SQLResultAdapter;
 import com.henryfabio.sqlprovider.executor.result.SimpleResultSet;
+import org.bukkit.entity.EntityType;
+import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Type;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
-public class MobCoinsDatabase {
+public class MobCoinsDatabase extends RepositoryProvider {
 
-    private static final String TABLE  = "mobcoins_table";
+    private static final String TABLE_NAME = "mobcoins_table";
+    private SQLExecutor sqlExecutor;
+
+    public MobCoinsDatabase(Plugin plugin) {
+        super(plugin);
+        this.prepare();
+
+        this.handleTable();
+    }
+
+    @Override
+    public SQLConnector prepare() {
+        final SQLConnector connector = super.prepare();
+        this.sqlExecutor = new SQLExecutor(connector);
+
+        return connector;
+    }
 
     public void handleTable() {
-        executor().updateQuery("CREATE TABLE IF NOT EXISTS " + TABLE + "(" +
-                "username TEXT NOT NULL," +
+        this.sqlExecutor.updateQuery("CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" +
+                "name VARCHAR(33) NOT NULL," +
                 "mobcoins DOUBLE NOT NULL" +
                 ");");
     }
 
+    public Set<User> selectMany() {
+        return this.sqlExecutor.resultManyQuery(
+                "SELECT * FROM " + TABLE_NAME, simpleStatement -> {
+                }, RankingDataBaseAdapter.class);
+    }
+
     public void insert(User user) {
-        executor().updateQuery("REPLACE INTO " + TABLE + " VALUES(?,?)",
-                simpleStatement -> {
-                    simpleStatement.set(1, user.getName());
-                    simpleStatement.set(2, user.getMobcoins());
-                });
+        CompletableFuture.runAsync(() -> {
+            this.sqlExecutor.updateQuery("REPLACE INTO " + TABLE_NAME + " VALUES(?,?)", simpleStatement -> {
+                simpleStatement.set(1, user.getName());
+                simpleStatement.set(2, user.getMobcoins());
+            });
+        });
     }
 
-    public Set<User> fetchAll() {
-        return executor().resultManyQuery(
-                "SELECT * FROM " + TABLE,
-                simpleStatement -> {},
-                MobCoinsDatabaseAdapter.class
-        );
+    public void deleteOne(User user) {
+        this.sqlExecutor.updateQuery(
+                "DELETE FROM " + TABLE_NAME + " WHERE name = ?", simpleStatement -> simpleStatement.set(1, user.getName()));
     }
 
-    public void delete(User user) {
-        executor().updateQuery("DELETE FROM " + TABLE + " WHERE username = ?", simpleStatement -> simpleStatement.set(1,  user.getName()));
-    }
-
-    private SQLExecutor executor()  {
-        return new SQLExecutor(MobCoinsPlugin.CONNECTOR);
-    }
-
-    public static class MobCoinsDatabaseAdapter implements SQLResultAdapter<User> {
+    public static class RankingDataBaseAdapter implements SQLResultAdapter<User> {
 
         @Override
         public User adaptResult(SimpleResultSet resultSet) {
 
             return new User(
-                    resultSet.get("username"),
+                    resultSet.get("name"),
                     resultSet.get("mobcoins")
             );
         }

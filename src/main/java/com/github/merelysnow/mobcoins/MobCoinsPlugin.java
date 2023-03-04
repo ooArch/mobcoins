@@ -1,6 +1,9 @@
 package com.github.merelysnow.mobcoins;
 
 import com.github.merelysnow.mobcoins.commands.MobCoinsCommand;
+import com.github.merelysnow.mobcoins.controller.EntityController;
+import com.github.merelysnow.mobcoins.controller.UserController;
+import com.github.merelysnow.mobcoins.database.MobCoinsDatabase;
 import com.github.merelysnow.mobcoins.database.connection.RepositoryProvider;
 import com.github.merelysnow.mobcoins.listeners.PlayerListener;
 import com.github.merelysnow.mobcoins.model.store.StoreDAO;
@@ -21,31 +24,37 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.LinkedHashMap;
 
+@Getter
 public class MobCoinsPlugin extends JavaPlugin {
-
-    public static MobCoinsPlugin plugin;
-    public static SQLConnector CONNECTOR;
-    @Getter private ViewFrame viewFrame;
-    @Getter private StoreDAO storeDAO;
-    @Getter private LinkedHashMap<EntityType, Double> cache = new LinkedHashMap<>();
+    private ViewFrame viewFrame;
+    private StoreDAO storeDAO;
+    private MobCoinsDatabase mobCoinsDatabase;
+    private UserController userController;
+    private EntityController entityController;
 
     @Override
     public void onEnable() {
-        plugin = this;
         saveDefaultConfig();
         DateManager.createConfig("loja");
 
-        CONNECTOR = RepositoryProvider.of(this).prepare();
-        new MobCoinsRepositories();
+        mobCoinsDatabase = new MobCoinsDatabase(this);
+        userController = new UserController(getMobCoinsDatabase());
+        entityController = new EntityController();
+
+        entityController.loadConfiguration();
 
         storeDAO = new StoreDAO(DateManager.getConfig("loja"));
         viewFrame = ViewFrame.of(this, new MobCoinsShopView()).register();
 
+        mobCoinsDatabase.selectMany()
+                .forEach(user -> {
+                    userController.registerUser(user);
+                });
+
         registerCommands();
         registerEvents();
-        registerEntity();
 
-        if(getConfig().contains("Locais.Holograma")) {
+        if (getConfig().contains("Locais.Holograma")) {
             (new HologramThread()).runTaskTimer(this, 20L, 60 * 30 * 20L);
             Bukkit.getConsoleSender().sendMessage("§6[MobCoins] §eHolograma registrado.");
         }
@@ -72,13 +81,8 @@ public class MobCoinsPlugin extends JavaPlugin {
         messageHolder.setMessage(MessageType.INCORRECT_TARGET, "§cVocê não pode utilizar este comando pois ele é direcioado apenas para {target}.");
     }
 
-    private void registerEntity() {
 
-        ConfigurationSection path = plugin.getConfig().getConfigurationSection("Configuration");
-
-        for (String key : path.getStringList("Entity")) {
-            String[] string = key.split(",");
-            cache.put(EntityType.valueOf(string[0].toUpperCase()), Doubles.tryParse(string[1]));
-        }
+    public static MobCoinsPlugin getInstance() {
+        return getPlugin(MobCoinsPlugin.class);
     }
 }

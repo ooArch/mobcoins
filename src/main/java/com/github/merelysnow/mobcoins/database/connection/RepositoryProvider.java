@@ -4,6 +4,7 @@ import com.henryfabio.sqlprovider.connector.SQLConnector;
 import com.henryfabio.sqlprovider.connector.type.SQLDatabaseType;
 import com.henryfabio.sqlprovider.connector.type.impl.MySQLDatabaseType;
 import com.henryfabio.sqlprovider.connector.type.impl.SQLiteDatabaseType;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -12,7 +13,7 @@ import org.bukkit.plugin.Plugin;
 import java.io.File;
 import java.util.logging.Logger;
 
-@Data(staticConstructor = "of")
+@AllArgsConstructor
 public class RepositoryProvider {
 
     private final Plugin plugin;
@@ -39,18 +40,15 @@ public class RepositoryProvider {
         } else {
             logger.severe("Database type is invalid");
             return null;
-
         }
 
         return sqlConnector;
-
     }
 
     private SQLDatabaseType sqLiteDatabase(ConfigurationSection section) {
         return SQLiteDatabaseType.builder()
                 .file(new File(plugin.getDataFolder(), section.getString("file")))
                 .build();
-
     }
 
     private SQLDatabaseType mySqlDatabaseType(ConfigurationSection section) {
@@ -60,6 +58,5 @@ public class RepositoryProvider {
                 .password(section.getString("password"))
                 .database(section.getString("database"))
                 .build();
-
     }
 }

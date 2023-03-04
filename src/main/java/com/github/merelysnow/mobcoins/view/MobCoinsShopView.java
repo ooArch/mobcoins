@@ -1,7 +1,6 @@
 package com.github.merelysnow.mobcoins.view;
 
 import com.github.merelysnow.mobcoins.MobCoinsPlugin;
-import com.github.merelysnow.mobcoins.MobCoinsRepositories;
 import com.github.merelysnow.mobcoins.model.User;
 import com.github.merelysnow.mobcoins.utils.ActionBar;
 import com.github.merelysnow.mobcoins.utils.ItemBuilder;
@@ -37,7 +36,7 @@ public class MobCoinsShopView extends View {
                 .setSkullOwner(context.getPlayer().getName())
                 .build());
 
-        MobCoinsPlugin.plugin.getStoreDAO().getItem().entrySet().stream().map(Map.Entry::getValue).forEach(store -> {
+        MobCoinsPlugin.getInstance().getStoreDAO().getItem().entrySet().stream().map(Map.Entry::getValue).forEach(store -> {
             context.slot(store.getSlot(), store.getIcon())
                     .onClick(ctx -> {
 
@@ -50,7 +49,7 @@ public class MobCoinsShopView extends View {
                         user.setMobcoins(user.getMobcoins() - store.getPrice());
                         context.getPlayer().playSound(context.getPlayer().getLocation(), Sound.LEVEL_UP, 1.5f, 1.5f);
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), store.getCommand().replace("{player}", context.getPlayer().getName()));
-                        Schedulers.async().runLater(() -> MobCoinsRepositories.MYSQL.insert(user),  5, TimeUnit.SECONDS);
+                        MobCoinsPlugin.getInstance().getMobCoinsDatabase().insert(user);
                         ActionBar.sendToPlayer(context.getPlayer(), "§eVocê adquiriu o item §f" + store.getName() + " §epor §f" + NumberFormat.getInstance().format(store.getPrice()) + " §eMobCoins");
                     });
         });

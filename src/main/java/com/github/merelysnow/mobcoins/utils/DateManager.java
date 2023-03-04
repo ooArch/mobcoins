@@ -9,7 +9,7 @@ import java.io.File;
 
 public class DateManager {
 
-    private static final MobCoinsPlugin main = MobCoinsPlugin.plugin;
+    private static final MobCoinsPlugin main = MobCoinsPlugin.getInstance();
 
     public static void createFolder(String folder) {
         try {
